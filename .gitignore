@@ -1,14 +1,9 @@
-# Python
 venv/
 __pycache__/
 *.pyc
-
-# Environment variables (secrets!)
 .env
-
-# IDE files
 .vscode/
 .idea/
-
-# OS files
 .DS_Store
+models/*.json
+*.egg-info/
