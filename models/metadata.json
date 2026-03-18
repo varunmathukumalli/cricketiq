@@ -1,0 +1,27 @@
+{
+  "model_version": "v1",
+  "trained_at": "2026-03-17T21:22:52.194154",
+  "accuracy": 0.42857142857142855,
+  "log_loss": 1.2074687254340755,
+  "feature_columns": [
+    "team_a_form",
+    "team_b_form",
+    "head_to_head",
+    "venue_form",
+    "temperature",
+    "humidity",
+    "wind_speed",
+    "dew_point",
+    "form_diff",
+    "is_t20",
+    "is_odi"
+  ],
+  "hyperparameters": {
+    "n_estimators": 100,
+    "max_depth": 4,
+    "learning_rate": 0.1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "notes": "Date-based 80/20 split. No data leakage."
+}

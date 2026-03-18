@@ -1,0 +1,26 @@
+match_id,date,team_a,team_b,team_a_won,team_a_form,team_b_form,head_to_head,venue_form,temperature,humidity,wind_speed,dew_point,form_diff,is_t20,is_odi
+c2ad1210-6036-47e4-a17b-b138a8e34ba6,2026-02-06,Jharkhand,Uttarakhand,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,0
+41ba247c-ec78-4585-a896-bc323cec31f8,2026-02-06,Bengal,Andhra,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,0
+76f7ff26-60bb-4400-8d13-892f23124f9d,2026-02-20,Bangladesh A Women,Pakistan A Women,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+a841a814-93f8-4add-9f05-85b3dc7d5742,2026-03-10,Warriors,North West - Eastvaal Renault Dragons,1,0.5,0.5,0.5,0.5,22.7,71.0,25.8,17.1,0.0,0,1
+d9939616-6c8c-49ef-a4f0-203419f07f4e,2026-03-10,Malaysia,Bahrain,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+295eea99-7075-4ece-9d99-0448b6688fe7,2026-03-10,Botswana,Lesotho,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+ef581dc6-44c8-4598-b76c-188abf0c0b43,2026-03-11,Mpumalanga Rhinos,Northern Cape,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+a8806061-e5e6-4567-87f9-6b97b391f06f,2026-03-11,Eastern Storm,Knights,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+8027f2b2-6551-4c01-9f75-6b9d32048742,2026-03-11,Lions,Dolphins,1,0.5,0.5,0.5,0.5,20.2,41.0,11.1,5.4,0.0,0,1
+8702c96f-d2b1-4087-9ae1-cff47909643e,2026-03-11,Tasmania,New South Wales,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+47495f74-f7ea-4ef4-9dd1-095f95c8392e,2026-03-11,South Western Districts,South Africa Emerging Players,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+f6a859da-88d8-4053-9484-d907d89534c1,2026-03-11,Argentina,Mexico,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+1e3873cb-e44f-446f-8349-9992500cd033,2026-03-11,Mexico,Cayman Islands,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+8af703b9-cae9-48e3-8a36-57aa44355ff5,2026-03-11,Suriname,Cayman Islands,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+9d4db890-bd68-4400-98c0-368cd6ef5004,2026-03-11,Western Province,Boland,1,0.5,0.5,0.5,0.5,36.2,25.0,7.8,11.1,0.0,0,1
+994ae8e0-d138-495e-9975-a77d28e6f5af,2026-03-11,Bangladesh,Pakistan,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+a960b0e7-71bb-4e29-b69b-adaff9b3bed9,2026-03-11,Mumbai Spartans,India Captains,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+d173f7d7-881b-45d9-be23-4f76ff2473d7,2026-03-12,Border,Limpopo,1,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,0,1
+31aa9028-542b-4ab9-b432-fb9b9398922f,2026-03-12,Titans,KwaZulu-Natal Inland - Tuskers,1,0.5,0.5,0.5,0.5,17.7,80.0,10.6,14.1,0.0,0,1
+57fa32aa-fcd0-4d77-a2c8-91e90709cdba,2026-03-12,Royal Riders Punjab,India Tigers,0,0.5,0.5,0.5,0.5,25.0,60.0,10.0,15.0,0.0,1,0
+c3c01830-cc43-44fb-a0dd-0761a2776702,2026-03-12,Suriname,Argentina,0,0.0,1.0,0.5,0.0,25.0,60.0,10.0,15.0,-1.0,1,0
+53ca8dd0-2dfd-403e-be3a-c016b5cff5fc,2026-03-12,Botswana,Lesotho,1,1.0,0.0,1.0,1.0,25.0,60.0,10.0,15.0,1.0,1,0
+d97e95b1-c09a-4d41-ab8e-97f88ff217ca,2026-03-13,Konark Suryas Odisha,India Captains,1,0.5,1.0,0.5,0.5,25.0,60.0,10.0,15.0,-0.5,1,0
+10a987d4-8464-46f5-b31f-91f34fc98fe6,2026-03-13,Botswana,Lesotho,1,1.0,0.0,1.0,1.0,25.0,60.0,10.0,15.0,1.0,1,0
+fc9053b9-efdf-4953-9be8-79f89e4928a4,2026-03-13,Bangladesh,Pakistan,0,1.0,0.0,1.0,1.0,25.0,60.0,10.0,15.0,1.0,0,1
