@@ -43,6 +43,10 @@ def get_db():
 @app.get("/debug")
 def debug():
     """Temporary debug endpoint."""
+    db_url = os.getenv("DATABASE_URL")
+    has_url = db_url is not None and len(db_url) > 0
+    # Show first 30 chars only for security
+    preview = db_url[:30] + "..." if db_url and len(db_url) > 30 else db_url
     try:
         conn = get_db()
         cur = conn.cursor()
@@ -50,9 +54,9 @@ def debug():
         result = cur.fetchone()
         cur.close()
         conn.close()
-        return {"db": "connected", "result": result}
+        return {"db": "connected", "has_url": has_url, "url_preview": preview}
     except Exception as e:
-        return {"db": "error", "detail": str(e)}
+        return {"db": "error", "has_url": has_url, "url_preview": preview, "detail": str(e)}
 
 
 # ──────────────────────────────────────
