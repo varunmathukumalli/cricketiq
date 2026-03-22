@@ -184,14 +184,25 @@ def agent_status():
 # TRIGGER AGENT PIPELINE (async)
 # ──────────────────────────────────────
 
+pipeline_last_error = None
+
 def run_agent_pipeline():
     """Run the full agent pipeline in the background."""
+    global pipeline_last_error
+    pipeline_last_error = None
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
     try:
         from agents.graph import run_full_pipeline
         run_full_pipeline()
     except Exception as e:
+        import traceback
+        pipeline_last_error = traceback.format_exc()
         print(f"Agent pipeline error: {e}")
+
+
+@app.get("/agents/last-error")
+def agent_last_error():
+    return {"error": pipeline_last_error}
 
 
 @app.post("/agents/run")
