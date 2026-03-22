@@ -192,8 +192,25 @@ def run_agent_pipeline():
     pipeline_last_error = None
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
     try:
-        from agents.graph import run_full_pipeline
-        run_full_pipeline()
+        # Step 1: Fetch matches into DB
+        from tools.cricket_api import fetch_current_matches
+        from tools.database import save_matches
+        matches = fetch_current_matches()
+        if matches:
+            save_matches(matches)
+
+        # Step 2: Run pipeline on matches that need processing
+        from agents.graph import run_pipeline
+        from tools.database import query_database
+        matches = query_database("""
+            SELECT m.id FROM matches m
+            LEFT JOIN predictions p ON m.id = p.match_id
+            WHERE p.id IS NULL
+            ORDER BY m.date DESC NULLS LAST
+            LIMIT 5
+        """)
+        for m in matches:
+            run_pipeline(m["id"])
     except Exception as e:
         import traceback
         pipeline_last_error = traceback.format_exc()

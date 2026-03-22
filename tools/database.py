@@ -88,6 +88,62 @@ def save_matches(matches: list[dict]) -> dict:
     return {"inserted": inserted, "updated": updated}
 
 
+def save_weather(weather_results: list[dict]) -> dict:
+    """Insert or update weather data in match_weather table.
+
+    Args:
+        weather_results: List of weather dicts with keys:
+            match_id, temperature_c, humidity_pct, wind_speed_kmh,
+            precipitation_mm, dew_point_c, conditions (weather_code not available, stored as NULL),
+            cricket_impact (stored as weather_summary)
+
+    Returns:
+        Dict with counts: {"inserted": N, "updated": N, "skipped": N}
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    inserted, updated, skipped = 0, 0, 0
+
+    for w in weather_results:
+        if "error" in w or not w.get("match_id"):
+            skipped += 1
+            continue
+
+        cur.execute("""
+            INSERT INTO match_weather (match_id, temperature, humidity, wind_speed,
+                                       precipitation, dew_point, weather_summary)
+            VALUES (%(match_id)s, %(temperature)s, %(humidity)s, %(wind_speed)s,
+                    %(precipitation)s, %(dew_point)s, %(weather_summary)s)
+            ON CONFLICT (match_id) DO UPDATE SET
+                temperature = EXCLUDED.temperature,
+                humidity = EXCLUDED.humidity,
+                wind_speed = EXCLUDED.wind_speed,
+                precipitation = EXCLUDED.precipitation,
+                dew_point = EXCLUDED.dew_point,
+                weather_summary = EXCLUDED.weather_summary,
+                fetched_at = NOW()
+            RETURNING (xmax = 0) AS is_insert
+        """, {
+            "match_id": w["match_id"],
+            "temperature": w.get("temperature_c"),
+            "humidity": w.get("humidity_pct"),
+            "wind_speed": w.get("wind_speed_kmh"),
+            "precipitation": w.get("precipitation_mm"),
+            "dew_point": w.get("dew_point_c"),
+            "weather_summary": w.get("cricket_impact"),
+        })
+        result = cur.fetchone()
+        if result[0]:
+            inserted += 1
+        else:
+            updated += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"inserted": inserted, "updated": updated, "skipped": skipped}
+
+
 def get_database_status() -> dict:
     """Get a summary of what's in the database. Used by the Orchestrator."""
     conn = get_connection()
