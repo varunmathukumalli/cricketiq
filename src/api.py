@@ -217,7 +217,6 @@ def run_agent_pipeline():
             except Exception as e:
                 pipeline_errors.append(f"{m['id']}: {e}")
 
-        global pipeline_last_error
         if pipeline_errors:
             pipeline_last_error = f"Fetched {fetch_count} matches. Pipeline errors: " + "; ".join(pipeline_errors)
         else:
