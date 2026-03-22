@@ -195,7 +195,7 @@ def run_agent_pipeline():
         # Step 1: Fetch matches into DB (no filter to get all matches)
         from tools.cricket_api import fetch_current_matches
         from tools.database import save_matches, query_database
-        matches = fetch_current_matches(filter_major=False)
+        matches = fetch_current_matches(filter_major=True)
         fetch_count = 0
         if matches:
             result = save_matches(matches)
