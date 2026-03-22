@@ -36,9 +36,23 @@ app.add_middleware(
 
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.cursor_factory = psycopg2.extras.RealDictCursor
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     return conn
+
+
+@app.get("/debug")
+def debug():
+    """Temporary debug endpoint."""
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT 1 as test")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return {"db": "connected", "result": result}
+    except Exception as e:
+        return {"db": "error", "detail": str(e)}
 
 
 # ──────────────────────────────────────
