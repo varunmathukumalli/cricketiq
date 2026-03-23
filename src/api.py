@@ -69,21 +69,54 @@ def root():
 
 
 @app.get("/matches")
-def list_matches(limit: int = 20, match_type: str = None):
+def list_matches(limit: int = 50, match_type: str = None):
     conn = get_db()
     cur = conn.cursor()
-    query = "SELECT id, name, match_type, status, venue, date FROM matches"
+
+    where_clauses = []
     params = []
     if match_type:
-        query += " WHERE match_type = %s"
+        where_clauses.append("match_type = %s")
         params.append(match_type)
-    query += " ORDER BY date DESC LIMIT %s"
-    params.append(limit)
+
+    where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+    # Deduplicate by name+date, keeping the row with the most informative status
+    query = f"""
+        SELECT DISTINCT ON (name, date) id, name, match_type, status, venue, date
+        FROM matches
+        {where_sql}
+        ORDER BY name, date, CASE WHEN status LIKE '%%Match starts%%' THEN 1 ELSE 0 END ASC
+    """
     cur.execute(query, params)
-    matches = cur.fetchall()
+    all_matches = cur.fetchall()
+
+    live = []
+    completed = []
+    upcoming = []
+
+    for m in all_matches:
+        status = (m.get("status") or "").lower()
+        if "match starts" in status or "not started" in status:
+            upcoming.append(m)
+        elif "won" in status or "drawn" in status or "tied" in status or "no result" in status:
+            completed.append(m)
+        else:
+            live.append(m)
+
+    # Sort: upcoming earliest first, completed most recent first
+    upcoming.sort(key=lambda x: x.get("date") or "")
+    completed.sort(key=lambda x: x.get("date") or "", reverse=True)
+    live.sort(key=lambda x: x.get("date") or "", reverse=True)
+
     cur.close()
     conn.close()
-    return {"matches": matches, "count": len(matches)}
+    return {
+        "live": live,
+        "upcoming": upcoming[:limit],
+        "completed": completed[:limit],
+        "total": len(all_matches),
+    }
 
 
 @app.get("/matches/{match_id}")
