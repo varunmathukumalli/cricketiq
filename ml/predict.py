@@ -46,8 +46,9 @@ def load_model() -> tuple:
     Raises:
         FileNotFoundError: If model files do not exist (run train.py first)
     """
-    model_path = "models/model.json"
-    metadata_path = "models/metadata.json"
+    project_root = os.path.join(os.path.dirname(__file__), "..")
+    model_path = os.path.join(project_root, "models", "model.json")
+    metadata_path = os.path.join(project_root, "models", "metadata.json")
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(
@@ -68,11 +69,15 @@ def load_model() -> tuple:
 
 
 def get_upcoming_matches() -> list[dict]:
-    """Get matches that have not started yet from the database.
+    """Get upcoming/in-progress major matches from the database.
+
+    Filters out domestic and minor matches using the same logic as cricket_api.py.
 
     Returns:
         List of dicts with keys: id, name, match_type, venue, date, teams
     """
+    from tools.cricket_api import is_major_match
+
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
 
@@ -87,10 +92,15 @@ def get_upcoming_matches() -> list[dict]:
     """)
 
     columns = ["id", "name", "match_type", "venue", "date", "teams"]
-    matches = [dict(zip(columns, row)) for row in cur.fetchall()]
+    all_matches = [dict(zip(columns, row)) for row in cur.fetchall()]
 
     cur.close()
     conn.close()
+
+    # Filter to major matches only
+    matches = [m for m in all_matches if is_major_match(m)]
+    if len(matches) < len(all_matches):
+        print(f"  Filtered: {len(all_matches)} total → {len(matches)} major matches")
 
     return matches
 
@@ -188,7 +198,11 @@ def save_predictions(predictions: list[dict], model_version: str = "v1"):
 
 # ─────────────────────────────────────────────────
 # MAIN
-# ───────────────────* 60)
+# ─────────────────────────────────────────────────
+if __name__ == "__main__":
+    print("=" * 60)
+    print("CricketIQ — Win Probability Predictions")
+    print("=" * 60)
 
     # Load model
     print("\n[1/4] Loading trained model...")

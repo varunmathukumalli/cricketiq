@@ -154,34 +154,99 @@ export default function MatchPage() {
         )}
 
         {/* Player Performances */}
-        {performances.length > 0 && (
-          <Card title="Player Performances" icon="🏏" className="mt-6">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/5 text-left">
-                    <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium">Player</th>
-                    <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium">Team</th>
-                    <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Runs</th>
-                    <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">SR</th>
-                    <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Wickets</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {performances.map((p: any, i: number) => (
-                    <tr key={i} className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
-                      <td className="py-3 font-medium text-white">{p.player_name}</td>
-                      <td className="py-3 text-slate-500">{p.team}</td>
-                      <td className="py-3 text-right text-slate-300 tabular-nums">{p.runs_scored ?? "-"}</td>
-                      <td className="py-3 text-right text-slate-300 tabular-nums">{p.strike_rate ?? "-"}</td>
-                      <td className="py-3 text-right text-slate-300 tabular-nums">{p.wickets ?? "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
+        {performances.length > 0 && (() => {
+          const topBatters = [...performances]
+            .filter((p: any) => p.runs_scored != null && p.runs_scored > 0)
+            .sort((a: any, b: any) => b.runs_scored - a.runs_scored)
+            .slice(0, 6)
+            .map((p: any) => ({ name: p.player_name, runs: p.runs_scored, sr: p.strike_rate }));
+
+          const topBowlers = [...performances]
+            .filter((p: any) => p.wickets != null && p.wickets > 0)
+            .sort((a: any, b: any) => b.wickets - a.wickets || (a.economy || 99) - (b.economy || 99))
+            .slice(0, 6)
+            .map((p: any) => ({ name: p.player_name, wickets: p.wickets, economy: p.economy }));
+
+          return (
+            <>
+              {/* Charts row */}
+              {(topBatters.length > 0 || topBowlers.length > 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  {topBatters.length > 0 && (
+                    <Card title="Top Run Scorers" icon="🏏">
+                      <ResponsiveContainer width="100%" height={topBatters.length * 40 + 20}>
+                        <BarChart data={topBatters} layout="vertical" margin={{ left: 10, right: 10 }}>
+                          <XAxis type="number" stroke="#334155" fontSize={11} />
+                          <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={11} />
+                          <Tooltip
+                            formatter={(v) => `${v} runs`}
+                            contentStyle={{ backgroundColor: "#12121a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#e2e8f0", fontSize: "12px" }}
+                            cursor={{ fill: "rgba(255,255,255,0.02)" }}
+                          />
+                          <Bar dataKey="runs" fill="#10b981" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </Card>
+                  )}
+                  {topBowlers.length > 0 && (
+                    <Card title="Top Wicket Takers" icon="🎯">
+                      <ResponsiveContainer width="100%" height={topBowlers.length * 40 + 20}>
+                        <BarChart data={topBowlers} layout="vertical" margin={{ left: 10, right: 10 }}>
+                          <XAxis type="number" stroke="#334155" fontSize={11} allowDecimals={false} />
+                          <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={11} />
+                          <Tooltip
+                            formatter={(v) => `${v} wkts`}
+                            contentStyle={{ backgroundColor: "#12121a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#e2e8f0", fontSize: "12px" }}
+                            cursor={{ fill: "rgba(255,255,255,0.02)" }}
+                          />
+                          <Bar dataKey="wickets" fill="#3b82f6" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {/* Full table */}
+              <Card title="Scorecard" icon="📋" className="mt-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/5 text-left">
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium">Player</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium">Team</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Runs</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Balls</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">4s</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">6s</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">SR</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Overs</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Wkts</th>
+                        <th className="pb-3 text-[11px] uppercase tracking-wider text-slate-500 font-medium text-right">Eco</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {performances.map((p: any, i: number) => (
+                        <tr key={i} className="border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors">
+                          <td className="py-3 font-medium text-white">{p.player_name}</td>
+                          <td className="py-3 text-slate-500 text-xs">{p.team}</td>
+                          <td className="py-3 text-right text-slate-300 tabular-nums">{p.runs_scored ?? "-"}</td>
+                          <td className="py-3 text-right text-slate-500 tabular-nums">{p.balls_faced ?? "-"}</td>
+                          <td className="py-3 text-right text-slate-500 tabular-nums">{p.fours ?? "-"}</td>
+                          <td className="py-3 text-right text-slate-500 tabular-nums">{p.sixes ?? "-"}</td>
+                          <td className="py-3 text-right text-emerald-400/80 tabular-nums">{p.strike_rate ?? "-"}</td>
+                          <td className="py-3 text-right text-slate-500 tabular-nums">{p.overs_bowled ?? "-"}</td>
+                          <td className="py-3 text-right text-blue-400/80 tabular-nums">{p.wickets ?? "-"}</td>
+                          <td className="py-3 text-right text-slate-500 tabular-nums">{p.economy ?? "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </>
+          );
+        })()}
 
         {/* No data state */}
         {!prediction && !report && performances.length === 0 && (

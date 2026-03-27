@@ -174,6 +174,48 @@ def fetch_match_list(offset: int = 0, filter_major: bool = True) -> list[dict]:
     return cleaned
 
 
+def fetch_ipl_matches() -> list[dict]:
+    """Fetch IPL 2026 matches from the /v1/matches search endpoint.
+
+    The currentMatches endpoint doesn't include scheduled IPL matches.
+    This uses the search endpoint to find them.
+    """
+    IPL_FRANCHISES = {
+        "Chennai Super Kings", "Mumbai Indians", "Royal Challengers Bengaluru",
+        "Kolkata Knight Riders", "Rajasthan Royals", "Delhi Capitals",
+        "Punjab Kings", "Gujarat Titans", "Sunrisers Hyderabad", "Lucknow Super Giants",
+    }
+
+    all_matches = []
+    for offset in [0, 25, 50]:
+        url = f"{BASE_URL}/matches?apikey={CRICKET_API_KEY}&offset={offset}&search=Indian Premier League 2026"
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            if data.get("status") != "success":
+                break
+            for m in data.get("data", []):
+                teams = set(m.get("teams", []))
+                # Only include if both teams are IPL franchises
+                if teams.issubset(IPL_FRANCHISES) and len(teams) == 2:
+                    all_matches.append({
+                        "id": m.get("id"),
+                        "name": m.get("name", "Unknown"),
+                        "match_type": m.get("matchType"),
+                        "status": m.get("status"),
+                        "venue": m.get("venue"),
+                        "date": m.get("date"),
+                        "teams": m.get("teams", []),
+                        "score": m.get("score", []),
+                    })
+        except Exception as e:
+            print(f"  fetch_ipl_matches offset={offset}: {e}")
+            break
+
+    return all_matches
+
+
 def get_api_calls_remaining() -> str:
     """Check how many API calls we have left today.
     Returns a description string the agent can reason about."""

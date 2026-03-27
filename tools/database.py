@@ -144,6 +144,99 @@ def save_weather(weather_results: list[dict]) -> dict:
     return {"inserted": inserted, "updated": updated, "skipped": skipped}
 
 
+def save_player_performances(match_id: str, scorecard_data: dict) -> int:
+    """Parse a CricData scorecard response and save player performances.
+
+    Args:
+        match_id: The match ID
+        scorecard_data: Raw response from fetch_match_scorecard()
+
+    Returns:
+        Number of player performance rows saved
+    """
+    scorecard = scorecard_data.get("scorecard", [])
+    if not scorecard:
+        return 0
+
+    teams = scorecard_data.get("teams", [])
+    conn = get_connection()
+    cur = conn.cursor()
+    count = 0
+
+    for innings_idx, innings in enumerate(scorecard):
+        # Determine team name for this innings
+        team_name = teams[innings_idx] if innings_idx < len(teams) else f"Team {innings_idx + 1}"
+
+        # Process batters
+        for b in innings.get("batting", []):
+            batsman = b.get("batsman", {})
+            player_id = batsman.get("id")
+            player_name = batsman.get("name")
+            if not player_id or not player_name:
+                continue
+
+            # Upsert player
+            cur.execute("""
+                INSERT INTO players (id, name, country)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name
+            """, (player_id, player_name, team_name))
+
+            # Upsert batting performance
+            cur.execute("""
+                INSERT INTO player_performances (match_id, player_id, team, runs_scored, balls_faced, fours, sixes, strike_rate)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (match_id, player_id) DO UPDATE SET
+                    runs_scored = EXCLUDED.runs_scored,
+                    balls_faced = EXCLUDED.balls_faced,
+                    fours = EXCLUDED.fours,
+                    sixes = EXCLUDED.sixes,
+                    strike_rate = EXCLUDED.strike_rate
+            """, (
+                match_id, player_id, team_name,
+                b.get("r"), b.get("b"), b.get("4s"), b.get("6s"), b.get("sr"),
+            ))
+            count += 1
+
+        # Process bowlers
+        for bw in innings.get("bowling", []):
+            bowler = bw.get("bowler", {})
+            player_id = bowler.get("id")
+            player_name = bowler.get("name")
+            if not player_id or not player_name:
+                continue
+
+            # The bowling team is the OTHER team
+            bowling_team = teams[1 - innings_idx] if innings_idx < len(teams) and len(teams) > 1 else team_name
+
+            # Upsert player
+            cur.execute("""
+                INSERT INTO players (id, name, country)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name
+            """, (player_id, player_name, bowling_team))
+
+            # Upsert bowling data — merge with any existing batting row
+            cur.execute("""
+                INSERT INTO player_performances (match_id, player_id, team, overs_bowled, runs_conceded, wickets, economy)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (match_id, player_id) DO UPDATE SET
+                    overs_bowled = EXCLUDED.overs_bowled,
+                    runs_conceded = EXCLUDED.runs_conceded,
+                    wickets = EXCLUDED.wickets,
+                    economy = EXCLUDED.economy
+            """, (
+                match_id, player_id, bowling_team,
+                bw.get("o"), bw.get("r"), bw.get("w"), bw.get("eco"),
+            ))
+            count += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return count
+
+
 def get_database_status() -> dict:
     """Get a summary of what's in the database. Used by the Orchestrator."""
     conn = get_connection()

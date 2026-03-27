@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMatches, getPredictions, getAgentStatus, triggerAgents, Match, Prediction, CategorizedMatches } from "@/lib/api";
+import { getMatches, getPredictions, getAgentStatus, triggerAgents, getAgentLastError, Match, Prediction, CategorizedMatches } from "@/lib/api";
 
 export default function Home() {
   const [matchData, setMatchData] = useState<CategorizedMatches | null>(null);
@@ -36,12 +36,25 @@ export default function Home() {
     setAgentRunning(true);
     try {
       await triggerAgents();
-      setTimeout(async () => {
-        const [m, s] = await Promise.all([getMatches(50), getAgentStatus()]);
+
+      // Poll /agents/last-error every 5s until pipeline reports done
+      const poll = async () => {
+        for (let i = 0; i < 60; i++) {  // max 5 minutes
+          await new Promise((r) => setTimeout(r, 5000));
+          try {
+            const { error } = await getAgentLastError();
+            // error is null while running, gets set to a message when done
+            if (error !== null) break;
+          } catch { /* keep polling */ }
+        }
+        // Pipeline finished — refresh all data
+        const [m, p, s] = await Promise.all([getMatches(50), getPredictions(), getAgentStatus()]);
         setMatchData(m);
+        setPredictions(p);
         setAgentStatus(s);
         setAgentRunning(false);
-      }, 10000);
+      };
+      poll();
     } catch {
       setAgentRunning(false);
     }
@@ -105,6 +118,13 @@ export default function Home() {
               <p className="text-[11px] text-slate-500 tracking-wider uppercase">Multi-agent AI analytics</p>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/players"
+              className="px-4 py-2.5 rounded-xl text-sm font-medium border border-white/10 text-slate-300 hover:text-white hover:border-white/20 hover:bg-white/[0.04] transition-all"
+            >
+              IPL Players
+            </Link>
           <button
             onClick={handleRunAgents}
             disabled={agentRunning}
@@ -117,6 +137,7 @@ export default function Home() {
               {agentRunning ? "Agents running..." : "Run Agent Pipeline"}
             </span>
           </button>
+          </div>
         </div>
       </header>
 

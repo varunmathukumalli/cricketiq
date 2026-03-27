@@ -4,6 +4,9 @@ Verifies: features -> train -> predict -> tools all work together.
 """
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
 
 print("=" * 60)
 print("CricketIQ ML Pipeline — End-to-End Test")

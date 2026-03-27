@@ -1,4 +1,9 @@
 """Quick test that the ML tools are properly decorated and callable by agents."""
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+
 from tools.ml_model import get_prediction, get_feature_importance, get_model_accuracy
 
 # Verify they are LangChain tools (have the right attributes)

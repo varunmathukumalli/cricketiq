@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import json
 import time
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
@@ -137,7 +137,7 @@ def create_validation_llm():
              to return data matching our Pydantic model exactly.
              No parsing, no regex, no hoping the format is right.
     """
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
     # This is the key line — structured output
     structured_llm = llm.with_structured_output(MatchValidationResult)

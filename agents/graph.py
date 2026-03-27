@@ -28,6 +28,25 @@ load_dotenv()
 
 
 # ─────────────────────────────────────────────────
+# RETRY HELPER
+# ─────────────────────────────────────────────────
+import time
+
+def retry(fn, max_retries=3, description="operation"):
+    """Run a function with exponential backoff retries."""
+    for attempt in range(max_retries):
+        try:
+            return fn()
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                print(f"  [retry] {description} attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
+
+
+# ─────────────────────────────────────────────────
 # STEP 1: Define the pipeline state
 # ─────────────────────────────────────────────────
 # This state flows through the entire graph. Every node can read and write to it.
@@ -121,7 +140,7 @@ def fetch_node(state: PipelineState) -> dict:
         from tools.cricket_api import fetch_current_matches
         from tools.database import save_matches
 
-        matches = fetch_current_matches()
+        matches = retry(fetch_current_matches, description="cricket API fetch")
         result = save_matches(matches)
         summary = f"Fetched {len(matches)} matches (inserted: {result['inserted']}, updated: {result['updated']})"
         print(f"  [fetch] {summary}")
@@ -204,7 +223,7 @@ def weather_node(state: PipelineState) -> dict:
 
     try:
         from tools.report_tools import get_weather_summary
-        weather = get_weather_summary(match_id)
+        weather = retry(lambda: get_weather_summary(match_id), description="weather API")
 
         if "error" in weather:
             summary = f"No weather data available: {weather['error']}"
@@ -326,7 +345,7 @@ def explain_node(state: PipelineState) -> dict:
     try:
         from agents.explainer_agent import run_explainer
 
-        result = run_explainer(match_id)
+        result = retry(lambda: run_explainer(match_id), description="GPT-4o explainer")
 
         # Get the agent's final output
         summary = "Explanation generated"
@@ -378,7 +397,7 @@ def report_node(state: PipelineState) -> dict:
     try:
         from agents.report_agent import run_report_agent
 
-        result = run_report_agent(match_id)
+        result = retry(lambda: run_report_agent(match_id), description="Claude report agent")
 
         summary = "Report generated"
         for msg in reversed(result["messages"]):

@@ -1,8 +1,8 @@
 {
   "model_version": "v1",
-  "trained_at": "2026-03-17T21:22:52.194154",
-  "accuracy": 0.42857142857142855,
-  "log_loss": 1.2074687254340755,
+  "trained_at": "2026-03-23T17:45:55.935548",
+  "accuracy": 0.6666666666666666,
+  "log_loss": 0.7084833844167231,
   "feature_columns": [
     "team_a_form",
     "team_b_form",

@@ -263,10 +263,12 @@ def save_model(model: xgb.XGBClassifier, metrics: dict):
     The metadata file is important — it records which features the model
     expects, so predict.py knows what to compute.
     """
-    os.makedirs("models", exist_ok=True)
+    project_root = os.path.join(os.path.dirname(__file__), "..")
+    models_dir = os.path.join(project_root, "models")
+    os.makedirs(models_dir, exist_ok=True)
 
     # Save the model itself
-    model_path = "models/model.json"
+    model_path = os.path.join(models_dir, "model.json")
     model.save_model(model_path)
     print(f"\nModel saved to {model_path}")
 
@@ -287,7 +289,7 @@ def save_model(model: xgb.XGBClassifier, metrics: dict):
         "notes": "Date-based 80/20 split. No data leakage.",
     }
 
-    metadata_path = "models/metadata.json"
+    metadata_path = os.path.join(models_dir, "metadata.json")
     with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
     print(f"Metadata saved to {metadata_path}")
